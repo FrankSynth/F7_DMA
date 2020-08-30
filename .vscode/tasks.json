@@ -19,7 +19,7 @@
         {
             "label": "Build and Flash STM cpp",
             "type": "shell",
-            "command": "openocd -f interface/stlink.cfg  -f target/stm32h7x.cfg -c 'program build/F7_DMA.elf verify reset exit'",
+            "command": "openocd -f interface/stlink.cfg  -f target/stm32f7x.cfg -c 'program build/F7_DMA.elf verify reset exit'",
             "options": {
                 "cwd": "${workspaceRoot}"
             },

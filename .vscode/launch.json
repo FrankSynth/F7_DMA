@@ -12,7 +12,7 @@
             "device": "stlink",
             "configFiles": [
                 "interface/stlink.cfg",
-                "target/stm32h7x.cfg"
+                "target/stm32f7x.cfg"
             ]
         },
         {

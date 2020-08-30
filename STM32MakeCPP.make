@@ -58,6 +58,7 @@ Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim_ex.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart_ex.c \
+Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_usart.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_usb.c \
 Src/dma.c \
 Src/gpio.c \
@@ -65,6 +66,7 @@ Src/spi.c \
 Src/stm32f7xx_hal_msp.c \
 Src/stm32f7xx_it.c \
 Src/system_stm32f7xx.c \
+Src/tim.c \
 Src/usart.c \
 Src/usb_otg.c
 
@@ -162,7 +164,7 @@ CXXFLAGS += -feliminate-unused-debug-types
 # LDFLAGS
 #######################################
 # link script
-LDSCRIPT = STM32F722ZETx_FLASH.ld
+LDSCRIPT = STM32F722ZETx_FLASH.ld -TDMA_Buffer.ld
 
 # libraries
 LIBS = -lc -lm -lnosys 

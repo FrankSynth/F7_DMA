@@ -1,6 +1,3 @@
-# F7_DMA
-
-```
 SECTIONS
 {
     .dma_buffer : /* Space before ':' is critical */
@@ -8,4 +5,3 @@ SECTIONS
     *(.dma_buffer)
     } >RAM
 }
-```
