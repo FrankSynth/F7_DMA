@@ -34,7 +34,7 @@ void MX_TIM2_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 96-1;
+  htim2.Init.Prescaler = 108-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 4294967295;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -63,9 +63,9 @@ void MX_TIM5_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
   htim5.Instance = TIM5;
-  htim5.Init.Prescaler = 48000-1;
+  htim5.Init.Prescaler = 108-1;
   htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim5.Init.Period = 4294967295;
+  htim5.Init.Period = 1000-1;
   htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
@@ -107,6 +107,10 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE END TIM5_MspInit 0 */
     /* TIM5 clock enable */
     __HAL_RCC_TIM5_CLK_ENABLE();
+
+    /* TIM5 interrupt Init */
+    HAL_NVIC_SetPriority(TIM5_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(TIM5_IRQn);
   /* USER CODE BEGIN TIM5_MspInit 1 */
 
   /* USER CODE END TIM5_MspInit 1 */
@@ -134,6 +138,9 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE END TIM5_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_TIM5_CLK_DISABLE();
+
+    /* TIM5 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(TIM5_IRQn);
   /* USER CODE BEGIN TIM5_MspDeInit 1 */
 
   /* USER CODE END TIM5_MspDeInit 1 */

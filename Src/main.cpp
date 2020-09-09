@@ -26,7 +26,6 @@
 #include "usart.h"
 #include "usb_otg.h"
 
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
@@ -54,12 +53,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-char _spi_buffer_TX[SPI_BUFFER_LENGTH];
-char _char_bufferDMA1[150]; // DMA Buffer
-volatile char _spi_buffer_RX[SPI_BUFFER_LENGTH];
+DMA_BUFFER char _spi_buffer_TX[SPI_BUFFER_LENGTH];
+DMA_BUFFER char _char_bufferDMA1[150]; // DMA Buffer
+DMA_BUFFER volatile char _spi_buffer_RX[SPI_BUFFER_LENGTH];
 
-uint8_t _spi_rx_flag = 0;
+uint8_t _spi_tx_flag = 0;
 uint8_t _print_tx_flag = 0;
+uint32_t _timer_millis = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,36 +109,63 @@ int main(void) {
     /* USER CODE BEGIN 2 */
 
     // start timers
-    HAL_TIM_Base_Start(&htim2);
-    HAL_TIM_Base_Start(&htim5);
-    HAL_SPI_Receive_DMA(&hspi3, (uint8_t *)_spi_buffer_RX, SPI_BUFFER_LENGTH);
+    // HAL_TIM_Base_Start(&htim2);
+    // HAL_TIM_Base_Start_IT(&htim5);
+    // HAL_SPI_Receive_DMA(&hspi3, (uint8_t *)_spi_buffer_RX, SPI_BUFFER_LENGTH);
+    // HAL_SPI_Receive_DMA(&hspi3, (uint8_t *)_spi_buffer_RX, SPI_BUFFER_LENGTH);
+    memset(_spi_buffer_TX, 0b11001100, SPI_BUFFER_LENGTH);
+    HAL_SPI_Transmit_DMA(&hspi3, (uint8_t *)_spi_buffer_TX, SPI_BUFFER_LENGTH);
 
+    // HAL_SPI_TransmitReceive_DMA(&hspi3, (uint8_t *)_spi_buffer_RX, (uint8_t *)_spi_buffer_TX, SPI_BUFFER_LENGTH);
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
+    uint32_t counter = 0;
+    std::string output = "Yes ";
+    output.append(std::to_string(counter));
+    output.append("\r\n");
+    strcpy(_char_bufferDMA1, output.data());
+    print((uint8_t *)_char_bufferDMA1, output.size());
     while (1) {
-        static uint32_t timerMicros = 0;
-        static uint32_t timerMillis = 0;
+        // static uint32_t timerMicros = 0;
+        // static uint32_t timerMillis = 0;
 
-        // once every second
-        if (__HAL_TIM_GetCounter(&htim5) - timerMillis > 1000) {
+        // if (_timer_millis - timerMillis > 1000) {
 
-            timerMicros = __HAL_TIM_GetCounter(&htim2);
-            timerMillis = __HAL_TIM_GetCounter(&htim5);
+        //     timerMillis = _timer_millis;
+        //     timerMicros = __HAL_TIM_GetCounter(&htim2);
 
-            // prepare first string
-            std::string output = "Timer1: ";
-            output.append(std::to_string(timerMicros));
-            output.append(", Timer2: ");
-            output.append(std::to_string(timerMillis));
+        //     std::string output = "Timer1: ";
+        //     output.append(std::to_string(timerMicros));
+        //     output.append(", Timer2: ");
+        //     output.append(std::to_string(_timer_millis));
+        //     output.append("\r\n");
+        //     strcpy(_char_bufferDMA1, output.data());
+        // }
+
+        if (_spi_tx_flag) {
+            _spi_tx_flag = 0;
+
+            //     if (_spi_buffer_RX[0] == 0b01010101) {
+            //         _spi_buffer_RX[0] = 0;
+            counter++;
+            output = "Yes ";
+            output.append(std::to_string(counter));
             output.append("\r\n");
             strcpy(_char_bufferDMA1, output.data());
-            // strcpy(_char_bufferDMA1, "test\r\n");
-
             print((uint8_t *)_char_bufferDMA1, output.size());
-            // HAL_UART_Transmit(&huart3, (uint8_t *)_char_bufferDMA1, strlen(_char_bufferDMA1), 100);
+
+            //         HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+
+            HAL_SPI_Transmit_DMA(&hspi3, (uint8_t *)_spi_buffer_TX, SPI_BUFFER_LENGTH);
+            //     }
+            //     else {
+
+            // HAL_SPI_Receive_DMA(&hspi3, (uint8_t *)_spi_buffer_RX, SPI_BUFFER_LENGTH);
+            //     }
         }
+
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
@@ -161,18 +188,20 @@ void SystemClock_Config(void) {
     /** Configure the main internal regulator output voltage
      */
     __HAL_RCC_PWR_CLK_ENABLE();
-    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
     /** Initializes the RCC Oscillators according to the specified parameters
      * in the RCC_OscInitTypeDef structure.
      */
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM = 8;
-    RCC_OscInitStruct.PLL.PLLN = 96;
+    RCC_OscInitStruct.PLL.PLLM = 25;
+    RCC_OscInitStruct.PLL.PLLN = 432;
     RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-    RCC_OscInitStruct.PLL.PLLQ = 4;
+    RCC_OscInitStruct.PLL.PLLQ = 9;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
         Error_Handler();
     }
@@ -185,15 +214,15 @@ void SystemClock_Config(void) {
      */
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK) {
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK) {
         Error_Handler();
     }
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3 | RCC_PERIPHCLK_CLK48;
-    PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
+    PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_HSI;
     PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLL;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK) {
         Error_Handler();
@@ -209,21 +238,24 @@ void print(uint8_t *str, uint16_t size) {
 }
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
     if (huart->Instance == huart3.Instance) {
-        // toggle pin to show callback is working
         _print_tx_flag = 0;
-        HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
     }
 }
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
     if (hspi->Instance == hspi3.Instance) {
-        _spi_rx_flag = 1;
+        HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
     }
 }
+
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
     if (hspi->Instance == hspi3.Instance) {
+        _spi_tx_flag = 1;
+        HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
         // toggle pin to show callback is working
-        HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
     }
+}
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    _timer_millis++;
 }
 /* USER CODE END 4 */
 
