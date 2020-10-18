@@ -20,9 +20,9 @@ TARGET = F7_DMA
 # building variables
 ######################################
 # debug build?
-DEBUG = 1
+DEBUG = 0
 # optimization
-OPT = -Og
+OPT = -O2
 
 
 #######################################
@@ -140,6 +140,7 @@ C_INCLUDES =  \
 -IDrivers/CMSIS/Include \
 -IDrivers/STM32F7xx_HAL_Driver/Inc \
 -IDrivers/STM32F7xx_HAL_Driver/Inc/Legacy \
+-IC:/Users/lukas/Documents/GitHub/POLYLIB/library/debughelper \
 -IInc
 
 
@@ -158,7 +159,7 @@ endif
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 CXXFLAGS?=
-CXXFLAGS += -feliminate-unused-debug-types
+CXXFLAGS += -feliminate-unused-debug-types -std=c++2a
 
 #######################################
 # LDFLAGS

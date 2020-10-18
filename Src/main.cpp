@@ -28,9 +28,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdio.h>
-#include <string.h>
-#include <string>
+// #include <stdio.h>
+// #include <string.h>
+// #include <string>
+#include "debughelper.hpp"
 
 /* USER CODE END Includes */
 
@@ -41,7 +42,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define SPI_BUFFER_LENGTH 10
+// #define SPI_BUFFER_LENGTH 10
 
 /* USER CODE END PD */
 
@@ -53,13 +54,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-DMA_BUFFER char _spi_buffer_TX[SPI_BUFFER_LENGTH];
-DMA_BUFFER char _char_bufferDMA1[150]; // DMA Buffer
-DMA_BUFFER volatile char _spi_buffer_RX[SPI_BUFFER_LENGTH];
+// DMA_BUFFER char _spi_buffer_TX[SPI_BUFFER_LENGTH];
+// DMA_BUFFER char _char_bufferDMA1[150]; // DMA Buffer
+// DMA_BUFFER volatile char _spi_buffer_RX[SPI_BUFFER_LENGTH];
 
-uint8_t _spi_tx_flag = 0;
-uint8_t _print_tx_flag = 0;
-uint32_t _timer_millis = 0;
+// uint8_t _spi_tx_flag = 0;
+// uint8_t _print_tx_flag = 0;
+// uint32_t _timer_millis = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,64 +110,21 @@ int main(void) {
     /* USER CODE BEGIN 2 */
 
     // start timers
-    // HAL_TIM_Base_Start(&htim2);
-    // HAL_TIM_Base_Start_IT(&htim5);
-    // HAL_SPI_Receive_DMA(&hspi3, (uint8_t *)_spi_buffer_RX, SPI_BUFFER_LENGTH);
-    // HAL_SPI_Receive_DMA(&hspi3, (uint8_t *)_spi_buffer_RX, SPI_BUFFER_LENGTH);
-    memset(_spi_buffer_TX, 0b11001100, SPI_BUFFER_LENGTH);
-    HAL_SPI_Transmit_DMA(&hspi3, (uint8_t *)_spi_buffer_TX, SPI_BUFFER_LENGTH);
-
-    // HAL_SPI_TransmitReceive_DMA(&hspi3, (uint8_t *)_spi_buffer_RX, (uint8_t *)_spi_buffer_TX, SPI_BUFFER_LENGTH);
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
-    uint32_t counter = 0;
-    std::string output = "Yes ";
-    output.append(std::to_string(counter));
-    output.append("\r\n");
-    strcpy(_char_bufferDMA1, output.data());
-    print((uint8_t *)_char_bufferDMA1, output.size());
+
     while (1) {
-        // static uint32_t timerMicros = 0;
-        // static uint32_t timerMillis = 0;
-
-        // if (_timer_millis - timerMillis > 1000) {
-
-        //     timerMillis = _timer_millis;
-        //     timerMicros = __HAL_TIM_GetCounter(&htim2);
-
-        //     std::string output = "Timer1: ";
-        //     output.append(std::to_string(timerMicros));
-        //     output.append(", Timer2: ");
-        //     output.append(std::to_string(_timer_millis));
-        //     output.append("\r\n");
-        //     strcpy(_char_bufferDMA1, output.data());
-        // }
-
-        if (_spi_tx_flag) {
-            _spi_tx_flag = 0;
-
-            //     if (_spi_buffer_RX[0] == 0b01010101) {
-            //         _spi_buffer_RX[0] = 0;
-            counter++;
-            output = "Yes ";
-            output.append(std::to_string(counter));
-            output.append("\r\n");
-            strcpy(_char_bufferDMA1, output.data());
-            print((uint8_t *)_char_bufferDMA1, output.size());
-
-            //         HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-
-            HAL_SPI_Transmit_DMA(&hspi3, (uint8_t *)_spi_buffer_TX, SPI_BUFFER_LENGTH);
-            //     }
-            //     else {
-
-            // HAL_SPI_Receive_DMA(&hspi3, (uint8_t *)_spi_buffer_RX, SPI_BUFFER_LENGTH);
-            //     }
-        }
-
+        static uint32_t counter = 0;
+        uint8_t hex = 0xFA;
         /* USER CODE END WHILE */
+        HAL_Delay(300);
+        // sstr << "try this and that";
+        println("this is a counter ", counter++);
+        println("hex32 without command ", hex, ", and that is really great don'y ya think ", counter, " ", 0.12353);
+        // println("hex16 without command ", (uint16_t)hex);
+        // println("neg without command ", -32);
 
         /* USER CODE BEGIN 3 */
     }
@@ -230,33 +188,33 @@ void SystemClock_Config(void) {
 }
 
 /* USER CODE BEGIN 4 */
-void print(uint8_t *str, uint16_t size) {
-    while (_print_tx_flag == 1) {
-    }
-    _print_tx_flag = 1;
-    HAL_UART_Transmit_DMA(&huart3, str, size);
-}
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-    if (huart->Instance == huart3.Instance) {
-        _print_tx_flag = 0;
-    }
-}
-void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
-    if (hspi->Instance == hspi3.Instance) {
-        HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
-    }
-}
+// void print(uint8_t *str, uint16_t size) {
+//     while (_print_tx_flag == 1) {
+//     }
+//     _print_tx_flag = 1;
+//     HAL_UART_Transmit_DMA(&huart3, str, size);
+// }
+// void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+//     if (huart->Instance == huart3.Instance) {
+//         _print_tx_flag = 0;
+//     }
+// }
+// void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
+//     if (hspi->Instance == hspi3.Instance) {
+//         HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+//     }
+// }
 
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
-    if (hspi->Instance == hspi3.Instance) {
-        _spi_tx_flag = 1;
-        HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
-        // toggle pin to show callback is working
-    }
-}
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-    _timer_millis++;
-}
+// void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
+//     if (hspi->Instance == hspi3.Instance) {
+//         _spi_tx_flag = 1;
+//         HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+//         // toggle pin to show callback is working
+//     }
+// }
+// void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+//     _timer_millis++;
+// }
 /* USER CODE END 4 */
 
 /**
